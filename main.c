@@ -5,7 +5,7 @@
 
 int main() {
     // Test strings
-    char str1[] = "ABCD";
+    char str1[] = "ABCDE";
     char str2[] = "1234";
 
     // Call the assembly function and print the results
