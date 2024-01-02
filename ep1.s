@@ -2,52 +2,29 @@ section .text
 global ep1
 
 ep1:
-    ; Prologue
-    push ebp
-    mov ebp, esp
+    push rbp                ; Save base pointer
+    mov rbp, rsp            ; Set base pointer
+    mov rdi, [rbp+16]       ; Get the pointer to the string (1st argument)
+    xor rcx, rcx            ; Clear rcx, to be used for sum
 
-    ; Initialize ecx to 0 (this will hold our result)
-    xor ecx, ecx
+count_loop:
+    movzx rax, byte [rdi]   ; Load next byte from the string
+    test rax, rax           ; Check if it's the zero terminator
+    jz end_loop             ; If zero terminator, end loop
 
-    ; Get the string pointer from the stack
-    mov eax, [ebp+8]
+    mov rdx, rax            ; Copy the byte to rdx
+    and rax, 1              ; Check if the current byte position is odd or even
+    jnz count_ones          ; If odd, count ones
 
-    ; Initialize edx to 0 (this will be our byte counter)
-    xor edx, edx
+    xor rax, 0xFF           ; Invert bits for even bytes to count zeroes
+count_ones:
+    popcnt rax, rax         ; Count the number of ones in rax
+    add rcx, rax            ; Add the count to the checksum
 
-loop_start:
-    ; Load a byte from the string into bl
-    movzx ebx, byte [eax+edx]
+    inc rdi                 ; Move to the next byte
+    jmp count_loop
 
-    ; Check if we've reached the null terminator
-    test bl, bl
-    jz end
-
-    ; Increment the byte counter
-    inc edx
-
-    ; Check if the byte is odd or even
-    test dl, 1
-    jz even_byte
-
-odd_byte:
-    ; Count the number of set bits in bl and add to ecx
-    popcnt ebx, ebx
-    add ecx, ebx
-    jmp loop_start
-
-even_byte:
-    ; Invert the bits in bl, then count the number of set bits and add to ecx
-    not bl
-    popcnt ebx, ebx
-    add ecx, ebx
-    jmp loop_start
-
-end:
-    ; Move the result into eax (the return register)
-    mov eax, ecx
-
-    ; Epilogue
-    mov esp, ebp
-    pop ebp
-    ret
+end_loop:
+    mov rax, rcx            ; Move the sum to rax (return value)
+    pop rbp                 ; Restore base pointer
+    ret                     ; Return
