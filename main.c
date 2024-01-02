@@ -1,19 +1,44 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ep1.h"
 
+#define BUF_SIZE 1024
+
+char* read_from_stdin() {
+    char buffer[BUF_SIZE];
+    size_t contentSize = 1;
+    char *content = malloc(sizeof(char) * BUF_SIZE);
+    if (content == NULL) {
+        exit(1);
+    }
+    content[0] = '\0';
+
+    while (fgets(buffer, BUF_SIZE, stdin)) {
+        char *old = content;
+        contentSize += strlen(buffer);
+        content = realloc(content, contentSize);
+        if (content == NULL) {
+            free(old);
+            exit(2);
+        }
+        strcat(content, buffer);
+    }
+
+    return content;
+}
 
 int main() {
     // Test strings
-    char str1[] = "ABCDE";
-    char str2[] = "1234";
+
+    char *content = read_from_stdin();
 
     // Call the assembly function and print the results
-    int result1 = ep1(str1);
+    int result1 = ep1(content);
     printf("The result for 'ABCD' is %d\n", result1);  // Expected output: 15
 
-    int result2 = ep1(str2);
-    printf("The result for '1234' is %d\n", result2);  // Expected output: 16
+    //int result2 = ep1(str2);
+    //printf("The result for '1234' is %d\n", result2);  // Expected output: 16
 
     return 0;
 }
