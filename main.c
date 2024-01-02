@@ -32,10 +32,11 @@ int main() {
     // Test strings
 
     char *content = read_from_stdin();
+    printf("Processing string: %s\n", content);  // Print the string being processed
 
     // Call the assembly function and print the results
     int result1 = ep1(content);
-    printf("The result for 'ABCD' is %d\n", result1);  // Expected output: 15
+    printf("The result for '%s' is %d\n", content, result1);  // Expected output: 15
 
     //int result2 = ep1(str2);
     //printf("The result for '1234' is %d\n", result2);  // Expected output: 16
