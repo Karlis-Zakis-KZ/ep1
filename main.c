@@ -36,7 +36,7 @@ int main() {
 
     // Call the assembly function and print the results
     int result1 = ep1(content);
-    printf("%d", content, result1);  // Expected output: 15
+    printf("%d", result1);  // Expected output: 15
 
     //int result2 = ep1(str2);
     //printf("The result for '1234' is %d\n", result2);  // Expected output: 16
