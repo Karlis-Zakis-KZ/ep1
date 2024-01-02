@@ -1,30 +1,51 @@
-section .text
-global ep1
+.global ep1
 
 ep1:
-    push rbp                ; Save base pointer
-    mov rbp, rsp            ; Set base pointer
-    mov rdi, [rbp+16]       ; Get the pointer to the string (1st argument)
-    xor rcx, rcx            ; Clear rcx, to be used for sum
+    MOV R1, #0          // Initialize sum to 0
+    MOV R2, #0          // Initialize byte counter to 0
 
-count_loop:
-    movzx rax, byte [rdi]   ; Load next byte from the string
-    test rax, rax           ; Check if it's the zero terminator
-    jz end_loop             ; If zero terminator, end loop
+loop:
+    LDRB R3, [R0, R2]   // Load byte from string
+    CMP R3, #0          // Check if it's the null terminator
+    BEQ done            // If zero byte, end loop
 
-    mov rdx, rax            ; Copy the byte to rdx
-    and rax, 1              ; Check if the current byte position is odd or even
-    jnz count_ones          ; If odd, count ones
+    AND R4, R2, #1      // Check if byte is odd or even
+    CMP R4, #0
+    BEQ even_byte
 
-    xor rax, 0xFF           ; Invert bits for even bytes to count zeroes
+odd_byte:
+    MOV R4, R3          // Copy the byte
+    MOV R5, #8          // Set 8 iterations for bit count
+    MOV R6, #0          // Reset bit counter
+
 count_ones:
-    popcnt rax, rax         ; Count the number of ones in rax
-    add rcx, rax            ; Add the count to the checksum
+    ANDS R7, R4, #1     // Check if the last bit is 1
+    ADDNE R6, R6, #1    // If yes, increment bit counter
+    LSR R4, R4, #1      // Shift right to get next bit
+    SUBS R5, R5, #1     // Decrement iteration counter
+    BNE count_ones
 
-    inc rdi                 ; Move to the next byte
-    jmp count_loop
+    ADD R1, R1, R6      // Add bit count to sum
+    B next_byte
 
-end_loop:
-    mov rax, rcx            ; Move the sum to rax (return value)
-    pop rbp                 ; Restore base pointer
-    ret                     ; Return
+even_byte:
+    MVN R4, R3          // Invert the byte
+    MOV R5, #8          // Set 8 iterations for bit count
+    MOV R6, #0          // Reset bit counter
+
+count_zeros:
+    ANDS R7, R4, #1     // Check if the last bit is 1 (0 in original byte)
+    ADDNE R6, R6, #1    // If yes, increment bit counter
+    LSR R4, R4, #1      // Shift right to get next bit
+    SUBS R5, R5, #1     // Decrement iteration counter
+    BNE count_zeros
+
+    ADD R1, R1, R6      // Add bit count to sum
+
+next_byte:
+    ADD R2, R2, #1      // Move to the next byte
+    B loop
+
+done:
+    MOV R0, R1          // Return the sum
+    BX LR
