@@ -2,16 +2,17 @@
 
 ep1:
     MOV R1, #0          // Initialize sum to 0
-    MOV R2, #0          // Initialize byte counter to 0
+    MOV R2, #1          // Initialize byte counter to 1
 
 loop:
-    LDRB R3, [R0, R2]   // Load byte from string
+    LDRB R3, [R0], #1   // Load byte from string and increment pointer
     CMP R3, #0          // Check if it's the null terminator
     BEQ done            // If zero byte, end loop
 
     AND R4, R2, #1      // Check if byte is odd or even
     CMP R4, #0
-    BEQ even_byte
+    BNE odd_byte
+    B even_byte
 
 odd_byte:
     MOV R4, R3          // Copy the byte
